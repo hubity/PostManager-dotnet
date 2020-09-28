@@ -1,0 +1,51 @@
+﻿@page "/"
+@using Fullstack.Shared
+@inject HttpClient Http
+
+<div class="row">
+    <div class="col-lg-6 col-md-6 col-sm-12">
+        <h3>My posts</h3>
+        <br>
+@if (users == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table table-responsive">
+
+        <tbody>
+            @foreach (var user in users)
+            {
+                <tr>
+                    <td>@user.Name</td>
+
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+</div>
+</div>
+@code {
+    private User[] users;
+    private bool edit = false;
+    private User newUser = new User();
+
+    protected override async Task OnInitializedAsync()
+    {
+        users = await Http.GetFromJsonAsync<User[]>("api/user");
+    }
+    private async Task SubmitUser(){
+        if(edit == false){
+            await Http.PostAsJsonAsync<User>("api/user",newUser);
+            await OnInitializedAsync();
+            newUser = new User();
+        }else{
+            await Http.PutAsJsonAsync<User>("api/user/"+newUser.Id,newUser);
+            await OnInitializedAsync();
+            edit = false;
+            newUser = new User();
+        }
+    }
+}
